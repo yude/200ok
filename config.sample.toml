@@ -1,0 +1,6 @@
+[general]
+target = ["https://mstdn.pepepper.net", "https://mstdn.yude.jp"]
+
+[[platforms.foo-bar-discord-channel]]
+url = "https://discord.com/api/webhooks/foo/bar"
+type = "Discord"
