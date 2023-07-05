@@ -17,8 +17,9 @@ const (
 )
 
 type Platform struct {
-	Type PlatformType
-	Url  string
+	Type  PlatformType
+	Url   string
+	Token string
 }
 
 type DiscordImg struct {
