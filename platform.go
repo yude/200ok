@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 var embed_color int
@@ -17,7 +20,13 @@ func Post(target string, IsUp bool) {
 			if value.Type == Discord {
 				err := PostToDiscord(target, value.Url, IsUp)
 				if err != nil {
-					log.Println(err)
+					log.Println("[Discord]", err)
+				}
+			}
+			if value.Type == Mastodon {
+				err := PostToMastodon(target, value.Url, value.Token, IsUp)
+				if err != nil {
+					log.Println("[Mastodon]", err)
 				}
 			}
 		}
@@ -50,7 +59,7 @@ func PostToDiscord(target string, url string, IsUp bool) error {
 
 	j, err := json.Marshal(dw)
 	if err != nil {
-		return errors.New("Failed to create json struct.")
+		return errors.New("failed to create json struct")
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(j))
@@ -62,12 +71,44 @@ func PostToDiscord(target string, url string, IsUp bool) error {
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return errors.New("Failed to make our client work.")
+		return errors.New("failed to make our client work")
 	}
 
 	if resp.StatusCode == 204 {
 		return nil
 	} else {
-		return errors.New("Failed to communicate with Discord server.")
+		return errors.New("failed to communicate with Discord server")
 	}
+}
+
+func PostToMastodon(target string, instance_url string, token string, IsUp bool) error {
+	status_fmt := ""
+	if IsUp {
+		status_fmt = target + " is now up."
+	} else {
+		status_fmt = target + " is down."
+	}
+
+	val := url.Values{}
+	val.Set("status", status_fmt)
+	val.Set("visibility", "unlisted")
+
+	res, err := http.PostForm(instance_url+"/api/v1/statuses?access_token="+token, val)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Bearer " + token)
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusCreated {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return errors.New("failed to retrieve error")
+		}
+		return fmt.Errorf("http status code: %d, body: %s", res.StatusCode, b)
+	}
+
+	return nil
 }

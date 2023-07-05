@@ -4,3 +4,8 @@ target = ["https://mstdn.pepepper.net", "https://mstdn.yude.jp"]
 [[platforms.foo-bar-discord-channel]]
 url = "https://discord.com/api/webhooks/foo/bar"
 type = "Discord"
+
+[[platforms.mstdn-example-com]]
+url = "https://mstdn.example.com"
+type = "Mastodon"
+token = "piyofuga"
