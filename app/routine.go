@@ -10,12 +10,11 @@ import (
 var isRunning bool
 
 func StartRoutine() {
-	c := cron.New()
-
-	c.AddFunc("@every 5s", func() { Check() })
-
-	c.Start()
 	isRunning = false
+
+	c := cron.New()
+	c.AddFunc("@every 5s", func() { Check() })
+	c.Start()
 }
 
 func Check() {
